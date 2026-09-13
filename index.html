@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Anima Central</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .logo { width: 80px; height: 80px; border: 1px solid #0f0; border-radius: 50%; margin-bottom: 10px; }
+        button { width: 100%; max-width: 320px; padding: 18px; margin: 8px 0; background: #111; border: 1px solid #333; color: #0f0; cursor: pointer; text-transform: uppercase; font-weight: bold; }
+        #estado { margin-top: 25px; padding: 15px; border: 1px dashed #333; width: 100%; max-width: 300px; text-align: center; font-size: 13px; color: #aaa; }
+        .input-box { margin-top: 30px; width: 100%; max-width: 300px; }
+        input { width: 100%; padding: 12px; background: #111; color: #0f0; border: 1px solid #333; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    <img src="https://cdn-icons-png.flaticon.com/512/2857/2857535.png" class="logo" alt="Nexus">
+    <h2>NEXUS ANIMA CENTRAL</h2>
+    
+    <button onclick="ejecutar('musica')">🎵 Generar Música</button>
+    <button onclick="ejecutar('video')">🎬 Generar Video</button>
+    <button onclick="ejecutar('investigacion')">🔍 Investigar</button>
+    <button onclick="ejecutar('proyectos')">🛠️ Proyectos</button>
+    
+    <div class="input-box">
+        <input type="password" id="input-llave" placeholder="Pega aquí tu llave hf_...">
+        <button onclick="guardarLlave()">Guardar Llave</button>
+    </div>
+
+    <div id="estado">Estado: Sistema en espera...</div>
+
+    <script>
+        function guardarLlave() {
+            const llave = document.getElementById('input-llave').value;
+            if (llave) {
+                localStorage.setItem('NEXUS_TOKEN', llave);
+                alert("Llave guardada de forma segura.");
+            }
+        }
+
+        async function ejecutar(modulo) {
+            const token = localStorage.getItem('NEXUS_TOKEN');
+            if (!token) {
+                alert("Error: Primero guarda tu llave de seguridad.");
+                return;
+            }
+            
+            const estado = document.getElementById('estado');
+            estado.innerText = "Estado: Conectando con " + modulo + "...";
+            
+            try {
+                const response = await fetch("https://api-inference.huggingface.co/models/stabilityai/stable-video-diffusion-img2vid-xt", {
+                    method: "POST",
+                    headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+                    body: JSON.stringify({ inputs: "Cinematic 8k, " + modulo })
+                });
+                
+                if (response.ok) {
+                    estado.innerText = "Estado: " + modulo + " procesado correctamente.";
+                } else {
+                    estado.innerText = "Estado: Error en la API.";
+                }
+            } catch (e) {
+                estado.innerText = "Estado: Fallo de conexión.";
+            }
+        }
+    </script>
+</body>
+</html>
